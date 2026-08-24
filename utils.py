@@ -8,9 +8,174 @@ import cv2
 import mediapy as media
 from mujoco_playground._src.gait import draw_joystick_command
 
+
+def _draw_perception_grid(scene, points, values):
+    """Draw the actor's exact ego-centric terrain observation."""
+    max_abs = max(float(np.max(np.abs(values))), 0.1)
+    for point, value in zip(points, values):
+        if scene.ngeom >= scene.maxgeom:
+            return
+        # Blue is lower than the local reference; red is higher.
+        # Normalize each frame's colors so small but real step differences
+        # remain visible.  Geometry height still shows the unmodified sample.
+        normalized = float(np.clip(0.5 * (value / max_abs + 1.0), 0.0, 1.0))
+        rgba = np.array(
+            [normalized, 0.2, 1.0 - normalized, 0.55], dtype=np.float32
+        )
+        marker_pos = np.asarray(point, dtype=np.float64).copy()
+        marker_pos[2] += 0.018
+        mujoco.mjv_initGeom(
+            scene.geoms[scene.ngeom],
+            mujoco.mjtGeom.mjGEOM_SPHERE,
+            np.array([0.006, 0.0, 0.0], dtype=np.float64),
+            marker_pos,
+            np.eye(3).reshape(-1),
+            rgba,
+        )
+        scene.ngeom += 1
+
+
+def _draw_training_overlay(scene, command_draw_fn, scan_points, scan_values):
+    command_draw_fn(scene)
+    if scan_points is not None:
+        _draw_perception_grid(scene, scan_points, scan_values)
+
+
+def _interpolate_scan_rectangle(values, offsets, size=90):
+    """Visualizes arbitrary samples on a rectangle without changing policy input."""
+    values = np.asarray(values, dtype=np.float32).reshape(-1)
+    offsets = np.asarray(offsets, dtype=np.float32)
+    if offsets.shape != (values.size, 2):
+        raise ValueError(
+            f"Expected one (x, y) offset per value; got {offsets.shape} and "
+            f"{values.shape}."
+        )
+
+    unique_x = np.unique(offsets[:, 0])
+    unique_y = np.unique(offsets[:, 1])
+    if unique_x.size * unique_y.size == values.size:
+        # Preserve crisp cells for complete Cartesian grids, including the
+        # provided 17 x 11 baseline.
+        raster = np.empty((unique_y.size, unique_x.size), dtype=np.float32)
+        x_index = {float(x): i for i, x in enumerate(unique_x)}
+        y_index = {float(y): i for i, y in enumerate(unique_y[::-1])}
+        for (x, y), value in zip(offsets, values):
+            raster[y_index[float(y)], x_index[float(x)]] = value
+        return cv2.resize(
+            raster, (size, size), interpolation=cv2.INTER_NEAREST
+        ), offsets
+
+    # Four-neighbour inverse-distance interpolation for arbitrary patterns.
+    # This affects only the display; the policy still receives `values`.
+    padding = 0.05
+    x_min, x_max = float(offsets[:, 0].min()), float(offsets[:, 0].max())
+    y_min, y_max = float(offsets[:, 1].min()), float(offsets[:, 1].max())
+    if x_min == x_max:
+        x_min, x_max = x_min - padding, x_max + padding
+    if y_min == y_max:
+        y_min, y_max = y_min - padding, y_max + padding
+    rows_y = np.linspace(y_max, y_min, size, dtype=np.float32)
+    cols_x = np.linspace(x_min, x_max, size, dtype=np.float32)
+    query_y, query_x = np.meshgrid(rows_y, cols_x, indexing="ij")
+    query = np.stack((query_x, query_y), axis=-1)
+    distance_sq = np.sum(
+        (query[:, :, None, :] - offsets[None, None, :, :]) ** 2, axis=-1
+    )
+    k = min(4, values.size)
+    nearest = np.argpartition(distance_sq, k - 1, axis=-1)[..., :k]
+    nearest_dist = np.take_along_axis(distance_sq, nearest, axis=-1)
+    nearest_values = values[nearest]
+    weights = 1.0 / np.maximum(nearest_dist, 1e-8)
+    raster = np.sum(weights * nearest_values, axis=-1) / np.sum(weights, axis=-1)
+    return raster, offsets
+
+
+def _overlay_scan_map(frame, values, offsets=None):
+    """Add a compact 2D view of the exact actor terrain input."""
+    if values is None:
+        return frame
+    values = np.asarray(values)
+    # A 0.1 normalized value is 5 cm with the default observation scale;
+    # using it as a floor prevents sensor noise on flat ground being painted
+    # as a full-height red/blue feature.
+    max_abs = max(float(np.max(np.abs(values))), 0.1)
+    color_values = np.clip(values / max_abs, -1.0, 1.0)
+    if offsets is not None:
+        values_2d, marker_offsets = _interpolate_scan_rectangle(
+            color_values, offsets
+        )
+        t = np.clip(0.5 * (values_2d + 1.0), 0.0, 1.0)[..., None]
+        low = np.array([35, 90, 240], dtype=np.float32)
+        high = np.array([240, 65, 35], dtype=np.float32)
+        rgb = (low * (1.0 - t) + high * t).astype(np.uint8)
+        grid = cv2.resize(rgb, (90, 90), interpolation=cv2.INTER_NEAREST)
+        x_min, x_max = marker_offsets[:, 0].min(), marker_offsets[:, 0].max()
+        y_min, y_max = marker_offsets[:, 1].min(), marker_offsets[:, 1].max()
+        x_span = max(float(x_max - x_min), 1e-6)
+        y_span = max(float(y_max - y_min), 1e-6)
+        for x, y in marker_offsets:
+            px = int(round(89 * (x - x_min) / x_span))
+            py = int(round(89 * (y_max - y) / y_span))
+            cv2.circle(grid, (px, py), 1, (25, 25, 25), -1)
+    elif values.size == 187:
+        values_2d = color_values.reshape(17, 11)[::-1]
+        t = np.clip(0.5 * (values_2d + 1.0), 0.0, 1.0)[..., None]
+        low = np.array([35, 90, 240], dtype=np.float32)
+        high = np.array([240, 65, 35], dtype=np.float32)
+        rgb = (low * (1.0 - t) + high * t).astype(np.uint8)
+        grid = cv2.resize(rgb, (90, 90), interpolation=cv2.INTER_NEAREST)
+    elif values.size != 25:
+        # Four foot-centred radial patterns: FL, FR, RL, RR.  The centre,
+        # inner cardinal ring, and outer 8-point ring retain spatial layout.
+        foot_values = color_values[-52:].reshape(4, 13)
+        canvas = np.full((90, 90, 3), 245, dtype=np.uint8)
+        centers = ((65, 24), (65, 66), (25, 24), (25, 66))
+        angles = np.arange(8) * np.pi / 4.0
+        offsets = [(0, 0)]
+        offsets += [(7 * np.cos(a), 7 * np.sin(a)) for a in angles[::2]]
+        offsets += [(14 * np.cos(a), 14 * np.sin(a)) for a in angles]
+        for center, samples in zip(centers, foot_values):
+            for (dx, dy), value in zip(offsets, samples):
+                t = float(np.clip(0.5 * (value + 1.0), 0.0, 1.0))
+                color = tuple(int(x) for x in (
+                    np.array([35, 90, 240]) * (1.0 - t)
+                    + np.array([240, 65, 35]) * t
+                ))
+                cv2.circle(canvas, (int(center[0] + dx), int(center[1] + dy)), 2, color, -1)
+        grid = canvas
+    else:
+        values = color_values.reshape(5, 5)
+        t = np.clip(0.5 * (values + 1.0), 0.0, 1.0)[..., None]
+        low = np.array([35, 90, 240], dtype=np.float32)
+        high = np.array([240, 65, 35], dtype=np.float32)
+        rgb = (low * (1.0 - t) + high * t).astype(np.uint8)
+        grid = cv2.resize(rgb, (90, 90), interpolation=cv2.INTER_NEAREST)
+        for coordinate in range(0, 91, 18):
+            cv2.line(grid, (coordinate, 0), (coordinate, 89), (25, 25, 25), 1)
+            cv2.line(grid, (0, coordinate), (89, coordinate), (25, 25, 25), 1)
+
+    panel = np.full((118, 100, 3), 245, dtype=np.uint8)
+    panel[24:114, 5:95] = grid
+    cv2.putText(
+        panel,
+        "terrain obs",
+        (6, 16),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        0.36,
+        (20, 20, 20),
+        1,
+        cv2.LINE_AA,
+    )
+    result = frame.copy()
+    result[8:126, 8:108] = panel
+    return result
+
 def render_video_during_training(current_policy, step_num, jit_step,jit_reset, env_cfg, eval_env_for_video):
     """Render a video using the current policy during training"""
     try:
+        # The constructed environment owns the validated, effective config.
+        # Do not depend on a mutable notebook-global copy during callbacks.
+        env_cfg = eval_env_for_video._config
         jit_inference_fn = jax.jit(current_policy)
         from mujoco_playground._src.gait import draw_joystick_command
         
@@ -20,6 +185,8 @@ def render_video_during_training(current_policy, step_num, jit_step,jit_reset, e
         rng = jax.random.PRNGKey(42)  # Fixed seed for consistency
         rollout = []
         modify_scene_fns = []
+        scan_history = []
+        scan_offset_history = []
         reward_history = []
         
         state = jit_reset(rng)
@@ -45,13 +212,41 @@ def render_video_during_training(current_policy, step_num, jit_step,jit_reset, e
             xyz += np.array([0, 0, 0.2])
             x_axis = state.data.xmat[eval_env_for_video._torso_body_id, 0]
             yaw = -np.arctan2(x_axis[1], x_axis[0])
+            command_draw_fn = functools.partial(
+                draw_joystick_command,
+                cmd=state.info["command"],
+                xyz=xyz,
+                theta=yaw,
+                scl=abs(state.info["command"][0]) / env_cfg.command_config.a[0],
+            )
+            scan_points = None
+            scan_values = None
+            use_height_scan = (
+                "perception" in env_cfg
+                and env_cfg.perception.use_height_scan
+                and hasattr(eval_env_for_video, "scan_points")
+            )
+            if use_height_scan:
+                points, heights = eval_env_for_video.scan_points(state.data)
+                scan_points = np.asarray(points).copy()
+                scan_points[:, 2] = np.asarray(heights)
+                # These are the exact noisy, normalized values seen by actor.
+                scan_values = np.asarray(
+                    state.obs["state"][-eval_env_for_video.scan_size:]
+                )
+                scan_offsets = np.asarray(
+                    eval_env_for_video.scan_ego_offsets(state.data)
+                )
+            else:
+                scan_offsets = None
+            scan_history.append(scan_values)
+            scan_offset_history.append(scan_offsets)
             modify_scene_fns.append(
                 functools.partial(
-                    draw_joystick_command,
-                    cmd=state.info["command"],
-                    xyz=xyz,
-                    theta=yaw,
-                    scl=abs(state.info["command"][0]) / env_cfg.command_config.a[0],
+                    _draw_training_overlay,
+                    command_draw_fn=command_draw_fn,
+                    scan_points=scan_points,
+                    scan_values=scan_values,
                 )
             )
 
@@ -63,6 +258,7 @@ def render_video_during_training(current_policy, step_num, jit_step,jit_reset, e
         scene_option = mujoco.MjvOption()
         scene_option.geomgroup[2] = True
         scene_option.geomgroup[3] = False
+        scene_option.geomgroup[4] = True
         scene_option.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = True
         scene_option.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = False
         scene_option.flags[mujoco.mjtVisFlag.mjVIS_PERTFORCE] = True
@@ -183,6 +379,10 @@ def render_video_during_training(current_policy, step_num, jit_step,jit_reset, e
         # Create combined frames (video + reward plot side by side)
         combined_frames = []
         for frame_idx, frame in enumerate(frames):
+            scan_index = min(frame_idx * render_every, len(scan_history) - 1)
+            frame = _overlay_scan_map(
+                frame, scan_history[scan_index], scan_offset_history[scan_index]
+            )
             # Create reward plot for this frame
             reward_plot = create_reward_plot(frame_idx, reward_history, reward_keys)
             
@@ -217,6 +417,7 @@ def evaluate_policy(
     kick_duration_range: tuple = (0.2, 1.0),
 ):
     """Evaluate the policy over multiple episodes and return average reward."""
+    env_cfg = eval_env._config
     x_vels = [0.0, 0.5, 1.0, 0.0, 0.0, 0.5]
     y_vels = [0.0, 0.0, 0.0, 0.5, 1.0, 0.5]
     yaw_vels = [1.0, 0.0, 0.0, 0.0, 0.0, 0.1]
@@ -240,6 +441,8 @@ def evaluate_policy(
         rng = jax.random.PRNGKey(0)
         rollout = []
         modify_scene_fns = []
+        scan_history = []
+        scan_offset_history = []
 
         swing_peak = []
         rewards = []
@@ -289,16 +492,39 @@ def evaluate_policy(
             xyz += np.array([0, 0, 0.2])
             x_axis = state.data.xmat[env._torso_body_id, 0]
             yaw = -np.arctan2(x_axis[1], x_axis[0])
-            modify_scene_fns.append(
-                functools.partial(
-                    draw_joystick_command,
-                    cmd=state.info["command"],
-                    xyz=xyz,
-                    theta=yaw,
-                    scl=abs(state.info["command"][0])
-                    / env_cfg.command_config.a[0],
-                )
+            command_draw_fn = functools.partial(
+                draw_joystick_command,
+                cmd=state.info["command"],
+                xyz=xyz,
+                theta=yaw,
+                scl=abs(state.info["command"][0])
+                / env_cfg.command_config.a[0],
             )
+            scan_points = None
+            scan_values = None
+            use_height_scan = (
+                "perception" in env_cfg
+                and env_cfg.perception.use_height_scan
+                and hasattr(eval_env, "scan_points")
+            )
+            if use_height_scan:
+                points, heights = eval_env.scan_points(state.data)
+                scan_points = np.asarray(points).copy()
+                scan_points[:, 2] = np.asarray(heights)
+                scan_values = np.asarray(
+                    state.obs["state"][-eval_env.scan_size:]
+                )
+                scan_offsets = np.asarray(eval_env.scan_ego_offsets(state.data))
+            else:
+                scan_offsets = None
+            scan_history.append(scan_values)
+            scan_offset_history.append(scan_offsets)
+            modify_scene_fns.append(functools.partial(
+                _draw_training_overlay,
+                command_draw_fn=command_draw_fn,
+                scan_points=scan_points,
+                scan_values=scan_values,
+            ))
 
 
         render_every = 2
@@ -309,6 +535,7 @@ def evaluate_policy(
         scene_option = mujoco.MjvOption()
         scene_option.geomgroup[2] = True
         scene_option.geomgroup[3] = False
+        scene_option.geomgroup[4] = True
         scene_option.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = True
         scene_option.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = False
         scene_option.flags[mujoco.mjtVisFlag.mjVIS_PERTFORCE] = True
@@ -321,4 +548,10 @@ def evaluate_policy(
             height=480,
             modify_scene_fns=mod_fns,
         )
+        frames = [
+            _overlay_scan_map(
+                frame, scan_history[index], scan_offset_history[index]
+            )
+            for index, frame in zip(range(0, len(scan_history), render_every), frames)
+        ]
         media.show_video(frames, fps=fps)

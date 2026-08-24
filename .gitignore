@@ -1,5 +1,9 @@
 **/**.mp4
+artifacts/
+jupyter_kernel/
 .vscode
 **__pycache__/
 venv/
+.venv/
+.mujoco-osmesa/
 .ipynb_checkpoints
