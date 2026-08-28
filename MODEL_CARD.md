@@ -15,9 +15,20 @@ tags:
 This repository is the model archive for Proximal Policy Optimization
 locomotion experiments with a simulated Unitree Go1 quadruped.
 
-> **Status:** the custom Level E PPO loss and flat-ground experiment are
-> complete. No checkpoint has been exported from the notebook yet, so this
-> repository currently contains documentation only.
+## Level E rollout
+
+<p align="center">
+  <a href="assets/level-e-forward-evaluation.mp4">
+    <img src="assets/level-e-forward-evaluation.gif" alt="Trained Go1 policy following a forward command on flat terrain" width="640">
+  </a>
+</p>
+
+<p align="center"><em>Actual notebook evaluation footage: the trained Level E
+policy follows a 0.5 m/s forward command on flat terrain.</em></p>
+
+> **Status:** the custom Level E PPO loss and 200-million-step flat-ground
+> experiment are complete. The evaluation footage is published here, but no
+> checkpoint has been exported from the notebook yet.
 
 ## Source code
 

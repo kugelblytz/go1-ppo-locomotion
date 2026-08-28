@@ -5,6 +5,17 @@ quadruped with Proximal Policy Optimization (PPO). The project uses JAX for
 accelerated learning, Brax for PPO training, and MuJoCo Playground for robot
 simulation.
 
+## Level E rollout
+
+<p align="center">
+  <a href="https://huggingface.co/kugelblytz/go1-ppo-locomotion/resolve/main/assets/level-e-forward-evaluation.mp4">
+    <img src="docs/assets/level-e-forward-evaluation.gif" alt="Trained Go1 policy following a forward command on flat terrain" width="640">
+  </a>
+</p>
+
+<p align="center"><em>Trained Level E policy following a 0.5 m/s forward
+command on flat terrain. Click the preview for the full 20-second MP4.</em></p>
+
 ## Links
 
 - **Model and checkpoint:** [Hugging Face — Go1 PPO
@@ -118,11 +129,11 @@ Q/E for yaw, X or Space to stop, R to reset, and Escape to exit.
 
 ### Level E
 
-The custom PPO objective is complete and the notebook is configured for a
-200-million-step flat-ground Go1 training run. The notebook displays the
-evaluation reward curve and rollout videos during execution. Because those
-outputs have not been saved into the notebook file, this README does not report
-an unsupported final reward or embed a synthetic training curve.
+The custom PPO objective and 200-million-step flat-ground Go1 training run are
+complete. The rollout above was extracted directly from the notebook's saved
+evaluation output; it is not generated or stock footage. The README does not
+report a final reward because that numerical value was not preserved as text in
+the notebook output.
 
 Level C terrain experiments and exported checkpoints will be reported
 separately when they are completed.
