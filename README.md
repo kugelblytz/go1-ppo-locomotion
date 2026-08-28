@@ -32,7 +32,7 @@ command on flat terrain. Click the preview for the full 20-second MP4.</em></p>
   locomotion are future work.
 - **Model archive:** the private
   [Hugging Face model repository](https://huggingface.co/kugelblytz/go1-ppo-locomotion)
-  contains the model card; no checkpoint has been exported from Level E yet.
+  contains the model card, evaluation media, and final Level E checkpoint.
 
 The GitHub repository contains the code and experiment documentation. Hugging
 Face contains the model card and will hold the final model weights.

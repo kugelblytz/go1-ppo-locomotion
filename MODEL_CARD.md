@@ -27,8 +27,8 @@ locomotion experiments with a simulated Unitree Go1 quadruped.
 policy follows a 0.5 m/s forward command on flat terrain.</em></p>
 
 > **Status:** the custom Level E PPO loss and 200-million-step flat-ground
-> experiment are complete. The evaluation footage is published here, but no
-> checkpoint has been exported from the notebook yet.
+> experiment are complete. The evaluation footage and final checkpoint are
+> published here.
 
 ## Source code
 
@@ -51,18 +51,23 @@ are not claimed as completed results here.
 
 ## Checkpoint layout
 
-The final upload will preserve the complete checkpoint directory:
+The final Level E checkpoint is stored at:
 
 ```text
-final/
-├── params
-└── perception.json
+checkpoints/
+└── level_e/
+    └── final/
+        └── params
 ```
 
-`perception.json` must remain adjacent to `params`; it records the terrain
-sampling geometry expected by the trained policy.
+This flat-ground Level E policy does not use terrain-height observations, so it
+does not require a `perception.json` sampling specification.
 
 ## Results
+
+The exported checkpoint was trained for 201,523,200 environment steps. The
+evaluation media above shows the resulting deterministic policy tracking a
+0.5 m/s forward command on flat terrain.
 
 Training steps, evaluation reward, selected configuration, and demonstration
 media will be documented here after final training and evaluation.
