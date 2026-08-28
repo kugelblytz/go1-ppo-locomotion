@@ -1,13 +1,4 @@
-<p align="center">
-  <img src="docs/assets/go1-ppo-banner.svg" alt="Go1 PPO Locomotion" width="100%">
-</p>
-
-<p align="center">
-  <img alt="Python 3.12" src="https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white">
-  <img alt="JAX CUDA" src="https://img.shields.io/badge/JAX-CUDA-4C8BF5">
-  <img alt="MuJoCo 3.11" src="https://img.shields.io/badge/MuJoCo-3.11-00A6D6">
-  <img alt="PPO" src="https://img.shields.io/badge/algorithm-PPO-31C48D">
-</p>
+# PPO Quadruped Locomotion with JAX and MuJoCo
 
 This repository contains my implementation and experiments for training a Go1
 quadruped with Proximal Policy Optimization (PPO). The project uses JAX for
@@ -46,17 +37,6 @@ total loss = clipped policy loss + value loss - entropy bonus
 ```
 
 The implementation is in [`lab1_E.ipynb`](lab1_E.ipynb).
-
-## Training flow
-
-```mermaid
-flowchart LR
-    A[Go1 simulation] -->|observations| B[Policy network]
-    B -->|joint actions| A
-    A -->|rewards and transitions| C[GAE]
-    C --> D[Clipped PPO loss]
-    D -->|gradient update| B
-```
 
 ## Repository contents
 

@@ -10,10 +10,6 @@ tags:
   - unitree-go1
 ---
 
-<p align="center">
-  <img src="assets/go1-ppo-banner.svg" alt="Go1 PPO Locomotion" width="100%">
-</p>
-
 # Go1 PPO Locomotion
 
 This repository is the model archive for Proximal Policy Optimization
