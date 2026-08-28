@@ -1,4 +1,13 @@
-# PPO Quadruped Locomotion with JAX and MuJoCo
+<p align="center">
+  <img src="docs/assets/go1-ppo-banner.svg" alt="Go1 PPO Locomotion" width="100%">
+</p>
+
+<p align="center">
+  <img alt="Python 3.12" src="https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white">
+  <img alt="JAX CUDA" src="https://img.shields.io/badge/JAX-CUDA-4C8BF5">
+  <img alt="MuJoCo 3.11" src="https://img.shields.io/badge/MuJoCo-3.11-00A6D6">
+  <img alt="PPO" src="https://img.shields.io/badge/algorithm-PPO-31C48D">
+</p>
 
 This repository contains my implementation and experiments for training a Go1
 quadruped with Proximal Policy Optimization (PPO). The project uses JAX for
@@ -7,21 +16,21 @@ simulation.
 
 ## Links
 
-- **Model and checkpoint:** [Hugging Face — Go1 Perceptive Rough-Terrain
-  PPO](https://huggingface.co/kugelblytz/go1-perceptive-rough-terrain-ppo)
+- **Model and checkpoint:** [Hugging Face — Go1 PPO
+  Locomotion](https://huggingface.co/kugelblytz/go1-ppo-locomotion)
 - **Course starter repository:** [EAI 2026 Lab 1](https://github.com/finnBsch/eai2026_lab1_rl)
 - **Original assignment:** [assignment instructions](ASSIGNMENT_README.md)
 
 ## Project status
 
-- **Level E — PPO implementation:** implemented the PPO probability ratio,
+- **Level E — complete:** implemented the PPO probability ratio,
   clipped surrogate objective, value-function loss, entropy regularization,
-  and combined loss in `lab1_E.ipynb`.
-- **Level C — perceptive locomotion:** terrain observations, reward tuning, and
-  final rough-terrain training are in progress.
-- **Trained model:** the private
-  [Hugging Face model repository](https://huggingface.co/kugelblytz/go1-perceptive-rough-terrain-ppo)
-  is ready; checkpoint upload is pending completion of the final Level C run.
+  and combined loss, then completed flat-ground Go1 training in `lab1_E.ipynb`.
+- **Level C — next:** terrain observations, reward tuning, and rough-terrain
+  locomotion are future work.
+- **Model archive:** the private
+  [Hugging Face model repository](https://huggingface.co/kugelblytz/go1-ppo-locomotion)
+  contains the model card; no checkpoint has been exported from Level E yet.
 
 The GitHub repository contains the code and experiment documentation. Hugging
 Face contains the model card and will hold the final model weights.
@@ -37,6 +46,17 @@ total loss = clipped policy loss + value loss - entropy bonus
 ```
 
 The implementation is in [`lab1_E.ipynb`](lab1_E.ipynb).
+
+## Training flow
+
+```mermaid
+flowchart LR
+    A[Go1 simulation] -->|observations| B[Policy network]
+    B -->|joint actions| A
+    A -->|rewards and transitions| C[GAE]
+    C --> D[Clipped PPO loss]
+    D -->|gradient update| B
+```
 
 ## Repository contents
 
@@ -102,7 +122,7 @@ Generated artifacts are intentionally excluded from Git.
 ## Using the trained policy
 
 Download the complete final checkpoint directory from the
-[Hugging Face model repository](https://huggingface.co/kugelblytz/go1-perceptive-rough-terrain-ppo).
+[Hugging Face model repository](https://huggingface.co/kugelblytz/go1-ppo-locomotion).
 It must contain both `params` and `perception.json`. Then run:
 
 ```bash
@@ -116,8 +136,16 @@ Q/E for yaw, X or Space to stop, R to reset, and Escape to exit.
 
 ## Results
 
-Final training steps, evaluation reward, videos, and checkpoint files will be
-added after the rough-terrain policy finishes training and evaluation.
+### Level E
+
+The custom PPO objective is complete and the notebook is configured for a
+200-million-step flat-ground Go1 training run. The notebook displays the
+evaluation reward curve and rollout videos during execution. Because those
+outputs have not been saved into the notebook file, this README does not report
+an unsupported final reward or embed a synthetic training curve.
+
+Level C terrain experiments and exported checkpoints will be reported
+separately when they are completed.
 
 ## Origin
 

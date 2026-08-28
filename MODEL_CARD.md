@@ -10,20 +10,25 @@ tags:
   - unitree-go1
 ---
 
-# Go1 Perceptive Rough-Terrain PPO
+<p align="center">
+  <img src="assets/go1-ppo-banner.svg" alt="Go1 PPO Locomotion" width="100%">
+</p>
 
-This repository hosts a Proximal Policy Optimization policy for perceptive
-rough-terrain locomotion with a simulated Unitree Go1 quadruped.
+# Go1 PPO Locomotion
 
-> **Status:** the model repository has been created, but the final Level C
-> checkpoint is still training and has not yet been uploaded.
+This repository is the model archive for Proximal Policy Optimization
+locomotion experiments with a simulated Unitree Go1 quadruped.
+
+> **Status:** the custom Level E PPO loss and flat-ground experiment are
+> complete. No checkpoint has been exported from the notebook yet, so this
+> repository currently contains documentation only.
 
 ## Source code
 
 The implementation, experiment notebooks, environment setup, and loading tools
 are in the private GitHub repository:
 
-[kugelblytz/go1-perceptive-locomotion-ppo](https://github.com/kugelblytz/go1-perceptive-locomotion-ppo)
+[kugelblytz/go1-ppo-locomotion](https://github.com/kugelblytz/go1-ppo-locomotion)
 
 The project is based on the
 [EAI 2026 Lab 1 starter repository](https://github.com/finnBsch/eai2026_lab1_rl).
@@ -32,8 +37,10 @@ The original instructions are preserved in the project source repository.
 ## Method
 
 The project trains a Go1 locomotion policy with PPO using JAX, Brax, and MuJoCo
-Playground. The work includes a custom PPO loss implementation and a perceptive
-policy that receives local terrain-height observations for obstacle traversal.
+Playground. Level E implements the clipped surrogate policy objective, value
+loss, entropy regularization, and combined PPO loss for flat-ground training.
+Terrain perception and obstacle traversal belong to the later Level C stage and
+are not claimed as completed results here.
 
 ## Checkpoint layout
 
