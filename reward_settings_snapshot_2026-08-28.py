@@ -1,0 +1,30 @@
+"""Snapshot of the adjustable Lab C reward settings from lab1_C.ipynb."""
+
+REWARD_SETTINGS = {
+    "scales": {
+        "tracking_lin_vel": 5.0,
+        "tracking_ang_vel": 0.5,
+        "command_progress": 0.0,
+        "orientation": -1,
+        "lin_vel_z": -0.25,
+        "ang_vel_xy": -0.05,
+        "pose": 0.25,
+        "base_height": 0.0,
+        "feet_clearance": 0.1,
+        "feet_slip": -0.1,
+        "feet_air_time": 0.0,
+        "foot_contact": 0.0,
+        "stand_still": -1.0,
+        "feet_height": 0.0,
+        "action_rate": -0.01,
+        "torques": -0.0002,
+        "energy": -0.001,
+        "dof_acc": 0.0,
+        "dof_pos_limits": -1.0,
+        "termination": -1.0,
+        "stall": 0.0,
+    },
+    "tracking_sigma": 0.25,
+    "max_foot_height": 0.10,
+    "min_swing_air_time": 0.08,
+}
