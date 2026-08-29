@@ -2,7 +2,7 @@
 
 REWARD_SETTINGS = {
     "scales": {
-        "tracking_lin_vel": 5.0,
+        "tracking_lin_vel": 4.0,
         "tracking_ang_vel": 0.5,
         "command_progress": 0.0,
         "orientation": -1,
@@ -10,7 +10,7 @@ REWARD_SETTINGS = {
         "ang_vel_xy": -0.05,
         "pose": 0.25,
         "base_height": 0.0,
-        "feet_clearance": 0.1,
+        "feet_clearance": -0.2,
         "feet_slip": -0.1,
         "feet_air_time": 0.0,
         "foot_contact": 0.0,
