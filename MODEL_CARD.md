@@ -19,13 +19,14 @@ from flat-ground velocity tracking to exploratory terrain-aware control.
 
 | Policy | Training record | Availability |
 | --- | --- | --- |
-| Flat-ground PPO | 201,523,200 environment steps | Published in the associated Hugging Face archive at `checkpoints/level_e/final/params`; this statement does not imply that the archive is publicly accessible without authorization. |
-| Rough terrain, body sensing | 201,523,200-step notebook run | A local generated checkpoint is referenced by the notebook under ignored `artifacts/`; no rough-terrain checkpoint is published in this source repository or claimed to be in the model archive. |
-| Rough terrain, feet sensing | 504,627,200-step notebook run | A local generated checkpoint is referenced by the notebook under ignored `artifacts/`; no rough-terrain checkpoint is published in this source repository or claimed to be in the model archive. |
+| Flat-ground PPO | 201,523,200 environment steps | Private Hugging Face archive: `checkpoints/level_e/final/params` |
+| Rough terrain, body sensing | 201,523,200 environment steps | Private Hugging Face archive: `checkpoints/level_c/final/params` plus `perception.json` |
+| Rough terrain, feet sensing | 504,627,200 environment steps | Private Hugging Face archive: `checkpoints/level_c_feet_sensing/final/params` plus `perception.json` |
 
-The source repository deliberately excludes generated checkpoints. A notebook
-path proves that a checkpoint was written during that run, not that the files
-were uploaded or are publicly available.
+All three uploaded parameter files were checked against the corresponding local
+run artifacts by SHA-256 on 2026-09-06. The model archive is private, so this
+availability does not imply anonymous public access. The source repository
+deliberately excludes generated checkpoints.
 
 ## Demonstrations
 

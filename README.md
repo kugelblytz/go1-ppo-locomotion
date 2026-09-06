@@ -131,7 +131,10 @@ Generated checkpoints are excluded from Git and written beneath
 `artifacts/notebook_checkpoints/<run timestamp>/`. A rough-terrain checkpoint
 must be kept with its adjacent `perception.json`; the metadata fixes the sample
 anchors, offsets, coordinate frame, height scale, and terrain mode expected by
-that policy. See [`MODEL_CARD.md`](MODEL_CARD.md) for availability details.
+that policy. The linked private model archive contains the flat-ground,
+body-sensing, and feet-sensing checkpoints; it is not anonymously accessible at
+the time of this cleanup. See [`MODEL_CARD.md`](MODEL_CARD.md) for paths and
+availability details.
 
 ## Reproducing the notebooks
 
