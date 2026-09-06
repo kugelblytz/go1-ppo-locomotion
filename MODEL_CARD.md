@@ -10,70 +10,71 @@ tags:
   - unitree-go1
 ---
 
-# Go1 PPO Locomotion
+# Go1 PPO locomotion
 
-This repository is the model archive for Proximal Policy Optimization
-locomotion experiments with a simulated Unitree Go1 quadruped.
+Model information for PPO locomotion experiments with a simulated Unitree Go1,
+from flat-ground velocity tracking to exploratory terrain-aware control.
 
-## Level E rollout
+## Checkpoint availability
 
-<p align="center">
-  <a href="assets/level-e-forward-evaluation.mp4">
-    <img src="assets/level-e-forward-evaluation.gif" alt="Trained Go1 policy following a forward command on flat terrain" width="640">
-  </a>
-</p>
+| Policy | Training record | Availability |
+| --- | --- | --- |
+| Flat-ground PPO | 201,523,200 environment steps | Published in the associated Hugging Face archive at `checkpoints/level_e/final/params`; this statement does not imply that the archive is publicly accessible without authorization. |
+| Rough terrain, body sensing | 201,523,200-step notebook run | A local generated checkpoint is referenced by the notebook under ignored `artifacts/`; no rough-terrain checkpoint is published in this source repository or claimed to be in the model archive. |
+| Rough terrain, feet sensing | 504,627,200-step notebook run | A local generated checkpoint is referenced by the notebook under ignored `artifacts/`; no rough-terrain checkpoint is published in this source repository or claimed to be in the model archive. |
 
-<p align="center"><em>Actual notebook evaluation footage: the trained Level E
-policy follows a 0.5 m/s forward command on flat terrain.</em></p>
+The source repository deliberately excludes generated checkpoints. A notebook
+path proves that a checkpoint was written during that run, not that the files
+were uploaded or are publicly available.
 
-> **Status:** the custom Level E PPO loss and 200-million-step flat-ground
-> experiment are complete. The evaluation footage and final checkpoint are
-> published here.
+## Demonstrations
 
-## Source code
+The source repository includes notebook-extracted deterministic rollouts:
 
-The implementation, experiment notebooks, environment setup, and loading tools
-are in the private GitHub repository:
+- `docs/assets/flat-ground-ppo.mp4`: 0.5 m/s forward command on flat terrain;
+- `docs/assets/rough-terrain-body-sensing.mp4`: body-anchored terrain scan;
+- `docs/assets/rough-terrain-feet-sensing.mp4`: foot-anchored terrain scans.
 
-[kugelblytz/go1-ppo-locomotion](https://github.com/kugelblytz/go1-ppo-locomotion)
+The rough-terrain videos are qualitative results. The two runs used different
+training budgets and no shared held-out traversal success metric was recorded,
+so they do not establish that one sensing design is superior.
 
-The project is based on the
-[EAI 2026 Lab 1 starter repository](https://github.com/finnBsch/eai2026_lab1_rl).
-The original instructions are preserved in the project source repository.
+## Model inputs
 
-## Method
+The flat-ground policy uses the standard Go1 joystick observation and does not
+need terrain metadata.
 
-The project trains a Go1 locomotion policy with PPO using JAX, Brax, and MuJoCo
-Playground. Level E implements the clipped surrogate policy objective, value
-loss, entropy regularization, and combined PPO loss for flat-ground training.
-Terrain perception and obstacle traversal belong to the later Level C stage and
-are not claimed as completed results here.
+A rough-terrain policy is architecture-dependent on the exact terrain scan
+used during training. Its checkpoint directory must include `perception.json`
+next to `params`. Version 2 metadata records:
 
-## Checkpoint layout
+- `coordinate_frame` (`robot_yaw`);
+- each `body`, `FL`, `FR`, `RL`, or `RR` anchor and its ordered XY offsets;
+- `height_scale` and `use_height_scan`;
+- the training `terrain_type`.
 
-The final Level E checkpoint is stored at:
+At runtime, sample offsets are anchored to the torso or current foot position
+and rotated by torso yaw. Heights are encoded relative to terrain beneath the
+torso. Changing the sample count or ordering changes the policy input shape or
+semantics and is not checkpoint-compatible.
 
-```text
-checkpoints/
-└── level_e/
-    └── final/
-        └── params
-```
+## Method and provenance
 
-This flat-ground Level E policy does not use terrain-height observations, so it
-does not require a `perception.json` sampling specification.
+The flat-ground assignment implements the PPO likelihood ratio, clipped
+surrogate policy objective, value loss, entropy regularization, and combined
+loss. The terrain assignment explores body-relative and foot-relative height
+observations plus a tuned reward combining command tracking, stability,
+smoothness, energy, and terrain-relative swing clearance.
 
-## Results
+The project builds on the [EAI 2026 Lab 1 starter
+repository](https://github.com/finnBsch/eai2026_lab1_rl) and its Brax, JAX, and
+MuJoCo Playground training and simulation stack. The repository author did not
+write the complete framework.
 
-The exported checkpoint was trained for 201,523,200 environment steps. The
-evaluation media above shows the resulting deterministic policy tracking a
-0.5 m/s forward command on flat terrain.
+## Intended use and limitations
 
-Training steps, evaluation reward, selected configuration, and demonstration
-media will be documented here after final training and evaluation.
-
-## Intended use
-
-This policy is intended for coursework, reinforcement-learning experiments,
-and simulation-only evaluation. It has not been validated on physical robot
-hardware.
+These policies are intended for coursework and simulation experiments. They
+have not been validated or deployed on physical Go1 hardware. The environment
+uses simulator terrain heights directly; a real system would require a sensor
+and estimation pipeline that reproduces the expected observation semantics,
+along with sim-to-real validation and safety controls.

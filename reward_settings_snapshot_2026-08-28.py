@@ -1,4 +1,4 @@
-"""Snapshot of the adjustable Lab C reward settings from lab1_C.ipynb."""
+"""Snapshot of adjustable Lab C rewards from terrain_body_sensing.ipynb."""
 
 REWARD_SETTINGS = {
     "scales": {
