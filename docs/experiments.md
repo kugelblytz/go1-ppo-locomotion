@@ -116,11 +116,11 @@ The names “best” and “new_best” are historical labels, not verified rank
 The 36-point pair changes `feet_air_time` from 0 to 0.5; the 4-point run also
 uses `foot_contact=0.15`. Both differ from the later body and ring configurations
 (which use clearance 1.5, air time 2.0, contact 1.5, and slip −0.05). These
-snapshots are meaningful experiment history rather than exact duplicates. Keep
-them in a clearly labeled archive, or rely on the linked Git revision if a
-smaller portfolio-facing tree is preferred. This cleanup does not automatically
-delete them. The three descriptively named notebooks are the main project entry
-points.
+snapshots are meaningful experiment history rather than exact duplicates. They
+were removed from the portfolio-facing tree to keep the main entry points clear,
+but remain available through the linked Git revision. The recommended archive
+names above should be used if they are restored later. The three descriptively
+named notebooks are the main project entry points.
 
 ## Evidence limits
 

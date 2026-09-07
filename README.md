@@ -157,9 +157,9 @@ availability details.
 The three canonical notebooks remain at the repository root so their imports
 and artifact paths keep working. Their contents and outputs are unchanged by
 the renames. Earlier “best”, “new_best”, and “copy” snapshots contain distinct
-experiments and are catalogued with descriptive archive-name recommendations
-in the experiment record. Keeping them in Git history or moving them to an
-archive are both reasonable; this cleanup does not automatically delete them.
+experiments. They were removed from the portfolio-facing tree, remain
+recoverable from Git history, and are catalogued with descriptive archive-name
+recommendations in the experiment record.
 
 See [running the experiments](docs/running.md) for setup and checkpoint loading.
 The requested training budgets are 200 million steps for flat/body sensing and
