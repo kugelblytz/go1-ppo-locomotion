@@ -1,0 +1,71 @@
+{
+  "indexing": "zero-based",
+  "videos": [
+    {
+      "notebook": "ppo_flat_ground.ipynb",
+      "original_notebook": "lab1_E.ipynb",
+      "source_git_commit": "f4f484867323b95effd49dae7d6df0f6ad26f3db",
+      "original_notebook_sha256": "3253a8cbb954571a21bded6b7ceeb447190458400f5e1e1bb1bb7af685e47126",
+      "cell_index": 13,
+      "output_index": 3,
+      "evaluation_run_index": 1,
+      "command_vx_vy_yaw": [
+        0.5,
+        0.0,
+        0.0
+      ],
+      "mp4": "docs/assets/flat-ground-ppo.mp4",
+      "gif": "docs/assets/flat-ground-ppo.gif",
+      "sha256": "a4a46774cf2bee7e4384cacd3c9df6b5f90a820a0734c73b493716a0baffaa89",
+      "duration_seconds": 20,
+      "width": 640,
+      "height": 480,
+      "fps": 25,
+      "frame_count": 500
+    },
+    {
+      "notebook": "terrain_body_sensing.ipynb",
+      "original_notebook": "lab1_C.ipynb",
+      "source_git_commit": "f4f484867323b95effd49dae7d6df0f6ad26f3db",
+      "original_notebook_sha256": "6202daa0c3a2100a72777f79976d9139b50759dec7201b6d3e817396dd2e82c8",
+      "cell_index": 15,
+      "output_index": 4,
+      "evaluation_run_index": 1,
+      "command_vx_vy_yaw": [
+        0.5,
+        0.0,
+        0.0
+      ],
+      "mp4": "docs/assets/rough-terrain-body-sensing.mp4",
+      "gif": "docs/assets/rough-terrain-body-sensing.gif",
+      "sha256": "5d07bb13738cb734443dff2138fb51b912a9d3b699a53ac9a48a789f08e596f2",
+      "duration_seconds": 20,
+      "width": 640,
+      "height": 480,
+      "fps": 25,
+      "frame_count": 500
+    },
+    {
+      "notebook": "terrain_feet_sensing.ipynb",
+      "original_notebook": "lab1_C_feet_sensing.ipynb",
+      "source_git_commit": "f4f484867323b95effd49dae7d6df0f6ad26f3db",
+      "original_notebook_sha256": "13b2751fad677808085b7acd98560b69578ba473101f399dccf6ab510b8d6565",
+      "cell_index": 15,
+      "output_index": 4,
+      "evaluation_run_index": 1,
+      "command_vx_vy_yaw": [
+        0.5,
+        0.0,
+        0.0
+      ],
+      "mp4": "docs/assets/rough-terrain-feet-sensing.mp4",
+      "gif": "docs/assets/rough-terrain-feet-sensing.gif",
+      "sha256": "a95c97701509466eee94738803e1210c4efcc3831b74bb2c1c12f9e96eecf622",
+      "duration_seconds": 20,
+      "width": 640,
+      "height": 480,
+      "fps": 25,
+      "frame_count": 500
+    }
+  ]
+}
