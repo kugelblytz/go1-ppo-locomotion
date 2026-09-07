@@ -126,45 +126,6 @@ body-versus-feet comparison should therefore be treated as exploratory.
 See the [experiment record](docs/experiments.md) for source evidence, reward
 differences, and the limits of reconstructing a run from saved notebook cells.
 
-## Repository structure
-
-| Path | Purpose |
-| --- | --- |
-| `ppo_flat_ground.ipynb` | PPO loss implementation, flat-ground training, and evaluation |
-| `terrain_body_sensing.ipynb` | Final body-anchored terrain experiment |
-| `terrain_feet_sensing.ipynb` | Final foot-anchored terrain experiment |
-| `custom_ppo_train.py` | Course-derived PPO training loop with a pluggable loss |
-| `perceptive_go1.py` | Rough-terrain environment, observations, and reward terms |
-| `terrain_samples.py` | Sampling validation and `perception.json` checkpoint metadata |
-| `utils.py` | Rollout rendering and terrain-observation overlays |
-| `remote_control.py` | Keyboard-controlled local checkpoint evaluation |
-| `docs/assets/` | Notebook-extracted MP4 demonstrations and GIF previews |
-| `docs/experiments.md` | Recorded metrics, reward settings, and notebook archive recommendations |
-| `docs/checkpoints.json` | Verified checkpoint hashes and saved perception metadata |
-| `scripts/export_notebook_media.py` | Re-extract or verify the saved MP4s; generate GIF previews |
-| `ASSIGNMENT_README.md` | Unmodified course assignment instructions |
-| `MODEL_CARD.md` | Checkpoint scope, requirements, and limitations |
-
-Generated checkpoints are excluded from Git and written beneath
-`artifacts/notebook_checkpoints/<run timestamp>/`. A rough-terrain checkpoint
-must be kept with its adjacent `perception.json`; the metadata fixes the sample
-anchors, offsets, coordinate frame, height scale, and terrain mode expected by
-that policy. The linked private model archive contains the flat-ground,
-body-sensing, and feet-sensing checkpoints; it is not anonymously accessible at
-the time of this cleanup. See [`MODEL_CARD.md`](MODEL_CARD.md) for paths and
-availability details.
-
-The three canonical notebooks remain at the repository root so their imports
-and artifact paths keep working. Their contents and outputs are unchanged by
-the renames. Earlier “best”, “new_best”, and “copy” snapshots contain distinct
-experiments. They were removed from the portfolio-facing tree, remain
-recoverable from Git history, and are catalogued with descriptive archive-name
-recommendations in the experiment record.
-
-See [running the experiments](docs/running.md) for setup and checkpoint loading.
-The requested training budgets are 200 million steps for flat/body sensing and
-500 million for the final feet-sensing run.
-
 ## Course origin and attribution
 
 This repository is a fork and extension of the EAI 2026 reinforcement-learning
